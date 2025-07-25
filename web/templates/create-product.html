@@ -1,0 +1,28 @@
+{{define "product-create"}}
+<html>
+    <head>
+        <title>Product | Creation</title>
+    </head>
+    <body>
+        <form action="http://localhost:8080/creation" enctype="multipart/form-data" method="post">
+            <p>Введите название товара</p>
+            <input name="name" required>
+            <br>
+            <p>Ведите краткое описание товара</p>
+            <input name="description" type="text" required>
+            <br>
+            <p>Введите категорию товара</p>
+            <input name="category" required>
+            <br>
+            <p>Введите стоимость товара</p>
+            <input name="price" required>
+            <br>
+            <p>Загрузите изображение</p>
+            <br>
+            <input type="file" name="foto" multiple accept="image/jpeg, image/png,">
+            <br>
+            <input type="submit">
+        </form>
+    </body>
+</html>
+{{end}}
