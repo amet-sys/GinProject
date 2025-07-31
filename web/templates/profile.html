@@ -1,0 +1,465 @@
+{{define "profile"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль | Ginger</title>
+    <style>
+        /* Базовые стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Контейнер */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Карточка профиля */
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2.5rem;
+            max-width: 600px;
+            margin: 2rem auto;
+            text-align: center;
+        }
+        
+        /* Аватар */
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #3498db;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Информация пользователя */
+        .profile-info {
+            margin-bottom: 1.5rem;
+        }
+        
+        .profile-name {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-email {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-role {
+            display: inline-block;
+            background-color: #e8f4fc;
+            color: #3498db;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        /* Стили для товаров */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .product-info {
+            padding: 1.2rem;
+        }
+        
+        .product-name {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .product-category {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .product-price {
+            font-weight: bold;
+            color: #27ae60;
+            margin: 0.5rem 0;
+        }
+        
+        /* Кнопки */
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .profile-card {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
+            
+            .profile-avatar {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .upload-form {
+            margin-top: 1.5rem;
+        }
+
+        .file-input {
+            margin-bottom: 1rem;
+        }
+
+        .submit-btn {
+            background-color: #2ecc71;
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            /* Стили для модального окна редактирования */
+        
+        .close {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .close:hover {
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .btn-edit {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background-color: #e67e22;
+        }
+    </style>
+</head>
+<body>
+    {{template "header" .}}
+    
+    <div class="container">
+        <div class="profile-card">
+            <img src="{{.profileImage}}" alt="Аватар пользователя" class="profile-avatar">
+            
+            <button class="btn btn-primary" onclick="openModal()">Изменить аватар</button>
+            
+            <div class="profile-info">
+                <h1 class="profile-name">{{.user.Name}}</h1>
+                <p class="profile-email">{{.user.Email}}</p>
+                <span class="profile-role">{{.user.Role}}</span>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="http://localhost:8080/create-product" class="btn btn-primary">Создать товар</a>
+        </div>
+        
+        <div class="products-grid">
+            {{range .products}}
+            <div class="product-card">
+                <img src="{{index .Images 0}}" alt="{{.Name}}" class="product-image">
+                <div class="product-info">
+                    <h3 class="product-name">{{.Name}}</h3>
+                    <p class="product-category">{{.Category}} / {{.Subcategory}}</p>
+                    <p class="product-price">{{.Price}} ₽</p>
+                    <div class="product-actions">
+                        <button class="btn btn-edit" onclick="openEditModal('{{.Id}}', '{{.Name}}', '{{.Category}}', '{{.Subcategory}}', '{{.Price}}')">
+                            Изменить
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteResource('{{.Id}}')">
+                            Удалить
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    <!-- Модальное окно для редактирования -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUpdateModal()">&times;</span>
+            <h2>Редактировать товар</h2>
+            <form id="editForm" action="/update-product">
+                <input type="hidden" id="editProductId" name="id">
+                
+                <div class="form-group">
+                    <label for="editName">Название:</label>
+                    <input type="text" id="editName" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editCategory">Категория:</label>
+                    <input type="text" id="editCategory" name="category" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editSubcategory">Подкатегория:</label>
+                    <input type="text" id="editSubcategory" name="subcategory" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPrice">Цена:</label>
+                    <input type="number" id="editPrice" name="price" step="0.01" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно для загрузки аватара -->
+    <div id="avatarModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2>Загрузить новый аватар</h2>
+            <form id="avatarForm" class="upload-form" enctype="multipart/form-data">
+                <input type="file" id="avatarInput" class="file-input" accept="image/*" required>
+                <button type="submit" class="submit-btn">Сохранить</button>
+            </form>
+        </div>
+    </div>
+    
+    {{template "footer" .}}
+
+    <script>
+                    // Открытие модального окна с данными товара
+            function openEditModal(id, name, category, subcategory, price) {
+                document.getElementById('editProductId').value = id;
+                document.getElementById('editName').value = name;
+                document.getElementById('editCategory').value = category;
+                document.getElementById('editSubcategory').value = subcategory;
+                document.getElementById('editPrice').value = price;
+                
+                document.getElementById('editModal').style.display = 'block';
+            }
+            
+            // Закрытие модального окна
+            function closeUpdateModal() {
+                document.getElementById('editModal').style.display = 'none';
+            }
+            
+            // Закрытие при клике вне модального окна
+            window.onclick = function(event) {
+                const modal = document.getElementById('editModal');
+                if (event.target == modal) {
+                    closeModal();
+                }
+            }
+            
+            // Обработка отправки формы
+            document.getElementById('editForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Здесь можно добавить AJAX-запрос для сохранения изменений
+                fetch(this.action, {
+                    method: 'PUT',
+                    headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    body: new FormData(this)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        closeModal();
+                        location.reload(); // Обновляем страницу после сохранения
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+
+        // Открытие модального окна
+        function openModal() {
+            document.getElementById('avatarModal').style.display = 'block';
+        }
+
+        // Закрытие модального окна
+        function closeModal() {
+            document.getElementById('avatarModal').style.display = 'none';
+        }
+
+        // Обработка отправки формы
+        document.getElementById('avatarForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('avatarInput');
+            if (fileInput.files.length === 0) return;
+            
+            const formData = new FormData();
+            formData.append('avatar', fileInput.files[0]);
+            
+            try {
+                const response = await fetch('/profile/edit-image', {
+                    method: 'PATCH',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    // Закрываем модальное окно и обновляем страницу
+                    closeModal();
+                    window.location.reload();
+                } else {
+                    alert('Ошибка при загрузке изображения');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Произошла ошибка');
+            }
+        });
+
+        // Закрытие при клике вне окна
+        window.onclick = function(event) {
+            const modal = document.getElementById('avatarModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        function deleteResource(id) {
+            try {
+                const response = fetch(`http://localhost:8080/delete-product/${id}`, {
+                method: 'DELETE',
+                });
+                location.reload();
+            }
+            catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+    </script>
+</body>
+</html>
+{{end}}

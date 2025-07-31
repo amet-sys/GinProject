@@ -1,0 +1,249 @@
+{{define "productPage"}}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Product.Name}} | Ginger</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --text-color: #333;
+            --text-light: #7f8c8d;
+            --price-color: #e74c3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .product-page {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .product-gallery {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+        }
+        
+        .product-gallery img {
+            scroll-snap-align: start;
+            max-height: 400px;
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .product-gallery img:hover {
+            transform: scale(1.02);
+        }
+        
+        .product-info {
+            padding: 20px;
+        }
+        
+        .product-title {
+            font-size: 2rem;
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+        
+        .product-description {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+        
+        .product-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .product-category, 
+        .product-subcategory {
+            background: var(--light-color);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--dark-color);
+        }
+        
+        .product-price {
+            font-size: 1.8rem;
+            color: var(--price-color);
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .product-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-secondary {
+            background: var(--light-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-secondary:hover {
+            background: #d5dbdb;
+        }
+        
+        .creator-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .product-gallery {
+                flex-direction: column;
+            }
+            
+            .product-title {
+                font-size: 1.5rem;
+            }
+            
+            .product-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    {{template "header" .}}
+    
+    <div class="container">
+        <div class="product-page">
+            <div class="product-gallery">
+                {{range .Product.Images}}
+                    <img src="{{.}}" alt="{{$.Product.Name}}">
+                {{end}}
+            </div>
+            
+            <div class="product-info">
+                <h1 class="product-title">{{.Product.Name}}</h1>
+                
+                <p class="product-description">{{.Product.Description}}</p>
+                
+                <div class="product-meta">
+                    <span class="product-category">{{.Product.Category}}</span>
+                    <span class="product-subcategory">{{.Product.Subcategory}}</span>
+                </div>
+                
+                <div class="product-price">{{printf "%.2f ₽" .Product.Price}}</div>
+                
+                <div class="product-actions">
+                    {{if .user}}
+                    <button  id="addToCartBtn" class="btn btn-primary">Добавить в корзину</button>
+                    {{end}}
+                    <button class="btn btn-primary" onclick="window.location.href='/'">На главную</button>
+                </div>
+                
+                <div class="creator-info">
+                    Товар добавлен: {{.Product.Creator}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {{template "footer" .}}
+
+    <script>
+        document.getElementById('addToCartBtn').addEventListener('click', function() {
+            const productId = {{.Product.Id}}; // Получаем ID товара из шаблона
+            
+            fetch('/addtocart', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Показываем уведомление
+                    showToast('Товар добавлен в корзину');
+                } else {
+                    showToast('Ошибка: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showToast('Ошибка соединения', 'error');
+                console.error('Error:', error);
+            });
+        });
+    
+        // Функция для показа уведомлений
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    
+        // Функция для обновления счетчика корзины
+        function updateCartCount(count) {
+            document.getElementById('cartCount').textContent = count;
+        }
+    </script>
+</body>
+</html>
+{{end}}

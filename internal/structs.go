@@ -5,30 +5,33 @@ import (
 )
 
 type Product struct {
-	Id          int
-	Name        string `form:"name"`
-	Description string `form:"description"`
-	Category    string `form:"category"`
-	Price       int    `form:"price"`
-	Images      []string
-	Creator     string
+	Id          string   `json:"id"`
+	Name        string   `form:"name" json:"name"`
+	Description string   `form:"description" json:"description"`
+	Category    string   `form:"category" json:"category"`
+	Subcategory string   `form:"subcategory" json:"subcategory"`
+	Price       float64  `form:"price" json:"price"`
+	Images      []string `json:"images"`
+	Creator     string   `json:"creator"`
+	Counts      int
 }
-
-// func (p *Product) AllPaths() []string {
-// 	paths := make([]string, len(p.Images))
-// 	for i, img := range p.Images {
-// 		paths[i] = string(img)
-// 	}
-// 	return paths
-// }
 
 type User struct {
 	Id       int
+	Image    []byte
 	Name     string `form:"name"`
 	Email    string `form:"email"`
 	Password string `form:"password"`
 	Role     string `form:"role"`
-	Cart     []int
+	Cart     map[string]int
+}
+
+func (u *User) ToString() string {
+	return string(u.Image)
+}
+
+type RequestWithProductID struct {
+	ProductID string `json:"productId"`
 }
 
 // структура для токена

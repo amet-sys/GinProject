@@ -6,9 +6,14 @@
     <nav class="nav">
         <ul>
             <li><a href="/">Главная</a></li>
-            <li><a href="/products">Каталог</a></li>
-            <li><a href="/cart">Корзина</a></li>
+            <li class="dropdown">
+                <button id="catalog-toggle" class="catalog-toggle">Каталог</button>
+                <div class="dropdown-content" id="categories-menu">
+                    <!-- Категории будут загружены через JS -->
+                </div>
+            </li>
             {{if .user}}
+                <li><a href="/cart">Корзина</a></li>
                 <li><a href="/profile">Профиль</a></li>
                 <li><a href="/logout">Выйти</a></li>
             {{else}}
@@ -24,7 +29,7 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('login-modal')">&times;</span>
             <h2>Вход в аккаунт</h2>
-            <form id="login-form" method="POST" action="http://localhost:8080/authorization">
+            <form id="login-form" method="POST" action="http://localhost:8080/authorization" onsubmit="setTimeout(() => window.location.reload(), 100)">
                 <div class="form-group">
                     <label for="login-email">Email</label>
                     <input type="email" id="login-email" name="email" class="form-control" required>
@@ -49,7 +54,7 @@
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('register-modal')">&times;</span>
             <h2>Регистрация</h2>
-            <form id="register-form" method="POST" action="http://localhost:8080/registration">
+            <form id="register-form" method="POST" action="http://localhost:8080/registration" onsubmit="setTimeout(() => window.location.reload(), 100)">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="name">Имя</label>
@@ -96,23 +101,8 @@
 </header>
 
 <style>
-    /* Стили шапки */
-    .header {
-        background-color: #2c3e50;
-        color: white;
-        padding: 1rem 0;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        position: relative;
-        z-index: 100;
-    }
-    
-    .header-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
     .logo {
+        background-color: #2c3e50;
         font-size: 1.8rem;
         font-weight: bold;
     }
@@ -121,40 +111,136 @@
         color: white;
         text-decoration: none;
     }
+  /* Основные стили навбара */
+    .nav {
+        background-color: #2c3e50; /* Темно-синий фон */
+    }
     
-    nav ul {
+    .nav ul {
         display: flex;
         list-style: none;
+        margin: 0;
+        padding: 0;
+        align-items: center;
+        gap: 15px;
     }
-    
-    nav ul li {
-        margin-left: 1.5rem;
+
+    .nav li {
+        position: relative;
+        height: 100%;
+        display: flex;
+        align-items: center;
     }
-    
-    nav ul li a {
-        color: white;
+
+    .nav a {
+        color: white; /* Белый текст */
         text-decoration: none;
         font-weight: 500;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        height: 100%;
         transition: color 0.3s;
     }
-    
-    nav ul li a:hover {
-        color: #3498db;
+
+    .nav a:hover {
+        color: #3498db; /* Голубой при наведении */
     }
-    
-    .search input {
-        padding: 0.5rem;
+
+    /* Стили для кнопки каталога */
+    .catalog-toggle {
+        background: none;
         border: none;
-        border-radius: 4px;
-    }
-    
-    .search button {
-        padding: 0.5rem 1rem;
-        background-color: #3498db;
-        color: white;
-        border: none;
-        border-radius: 4px;
+        color: white; /* Белый текст */
+        font: inherit;
         cursor: pointer;
+        padding: 10px 15px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        transition: color 0.3s;
+    }
+
+    .catalog-toggle:hover {
+        color: #3498db; /* Голубой при наведении */
+    }
+
+    /* Стили для выпадающего меню */
+    .dropdown {
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: 100%;
+        background-color: #fff; /* Белый фон */
+        min-width: 250px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        z-index: 1000;
+        padding: 10px 0;
+        border-radius: 0 0 4px 4px;
+    }
+
+    /* Стили для категорий */
+    .category-item {
+        border-bottom: 1px solid #eee;
+    }
+
+    .category-header {
+        width: 100%;
+        text-align: left;
+        padding: 8px 15px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        color: #2c3e50; /* Темно-синий текст */
+    }
+
+    .category-header:hover {
+        background-color: #f8f9fa;
+    }
+
+    .subcategory-list {
+        display: none;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .subcategory-list li a {
+        display: block;
+        padding: 8px 25px;
+        color: #555; /* Серый текст */
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .subcategory-list li a:hover {
+        background-color: #f8f9fa;
+        color: #3498db; /* Голубой при наведении */
+        padding-left: 30px;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .dropdown-content {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .nav ul {
+            gap: 10px;
+        }
+        
+        .nav a, .catalog-toggle {
+            padding: 10px 8px;
+        }
     }
     
     /* Основные стили модального окна */
@@ -388,6 +474,83 @@
         });
 
         closeAllModals();
+    });
+
+        // Данные категорий
+        const categoriesData = {
+        "Продукты питания": ["Молочные продукты", "Мясо", "Рыба", "Фрукты", "Овощи", "Бакалея", "Кондитерские изделия", "Напитки"],
+        "Бытовая химия": ["Моющие средства", "Средства для уборки", "Средства личной гигиены"],
+        "Одежда и обувь": ["Мужская одежда", "Женская одежда", "Детская одежда", "Обувь", "Аксессуары"],
+        "Электроника": ["Телефоны", "Компьютеры", "Телевизоры", "Бытовая техника"],
+        "Товары для дома": ["Мебель", "Посуда", "Текстиль", "Декор"]
+    };
+
+    // Функция для создания URL
+    function createCategoryUrl(category, subcategory) {
+        const formattedCategory = category.toLowerCase().replace(/\s+/g, '-');
+        const formattedSubcategory = subcategory.toLowerCase().replace(/\s+/g, '-');
+        return `/products/${formattedCategory}/${formattedSubcategory}`;
+    }
+
+    // Функция для отображения категорий
+    function renderCategories() {
+        const menu = document.getElementById('categories-menu');
+        menu.innerHTML = '';
+        
+        for (const [category, subcategories] of Object.entries(categoriesData)) {
+            const categoryItem = document.createElement('div');
+            categoryItem.className = 'category-item';
+            
+            const categoryHeader = document.createElement('button');
+            categoryHeader.className = 'category-header';
+            categoryHeader.textContent = category;
+            
+            const subcategoryList = document.createElement('ul');
+            subcategoryList.className = 'subcategory-list';
+            
+            subcategories.forEach(subcategory => {
+                const item = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = createCategoryUrl(category, subcategory);
+                link.textContent = subcategory;
+                item.appendChild(link);
+                subcategoryList.appendChild(item);
+            });
+            
+            categoryItem.appendChild(categoryHeader);
+            categoryItem.appendChild(subcategoryList);
+            menu.appendChild(categoryItem);
+            
+            // Обработчик клика по категории
+            categoryHeader.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const list = this.nextElementSibling;
+                list.style.display = list.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+    }
+
+    // Управление открытием/закрытием основного меню
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCategories();
+        
+        const toggleBtn = document.getElementById('catalog-toggle');
+        const dropdown = document.getElementById('categories-menu');
+        let isMenuOpen = false;
+        
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isMenuOpen = !isMenuOpen;
+            dropdown.style.display = isMenuOpen ? 'block' : 'none';
+        });
+        
+        // Закрытие при клике вне меню
+        document.addEventListener('click', () => {
+            if (isMenuOpen) {
+                dropdown.style.display = 'none';
+                isMenuOpen = false;
+            }
+        });
     });
 </script>
 {{end}}

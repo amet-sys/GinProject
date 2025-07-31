@@ -52,21 +52,44 @@ func findFilesWalkDir() ([]string, error) {
 
 func main() {
 	router := gin.Default()
-	//Получам пути ко всем html
+
+	// Получаем пути ко всем html
 	paths, _ := findFilesWalkDir()
 	router.LoadHTMLFiles(paths...)
 
 	router.Static("/static", "./web/static")
 
+	// Публичные маршруты
 	router.POST("/registration", internal.Registration)
 	router.POST("/authorization", internal.Authorization)
-
 	router.GET("/", internal.Main)
-	router.GET("/product/:id")
-	router.GET("/cart", internal.Cart)
+	router.GET("/product/:id", internal.ShowProduct)
+	router.GET("/search", internal.Search)
+	router.GET("/products/:category/:subcategory", internal.GetProductsByCategory)
 
-	router.GET("/create-product", internal.CreationPage)
-	router.POST("/creation", internal.Creation)
+	// Защищенные маршруты (требуется аутентификация)
+	authGroup := router.Group("/")
+	authGroup.Use(internal.AuthMiddleware()) // Применяем middleware ко всем маршрутам в группе
+	{
+		authGroup.GET("/cart", internal.Cart)
+		authGroup.PATCH("/addtocart", internal.AddToCart)
+		authGroup.PATCH("/cart/increase", internal.IncreaseProduct)
+		authGroup.PATCH("/cart/decrease", internal.DecreaseProduct)
+		authGroup.PATCH("/cart/remove", internal.RemoveProduct)
+		// Защищённые маршруты (требуется роль продавца)
+		salersGroup := authGroup.Group("/")        // Используем authGroup как родительскую
+		salersGroup.Use(internal.RoleMiddleware()) // Добавляем middleware проверки роли
+		{
+			salersGroup.GET("/create-product", internal.CreationPage)
+			salersGroup.POST("/creation", internal.Creation)
+			salersGroup.PUT("/update-product", internal.UpdateProduct)
+			salersGroup.DELETE("/delete-product/:id", internal.DeleteProduct)
+		}
+
+		authGroup.GET("/profile", internal.Profile)
+		authGroup.PATCH("/profile/edit-image", internal.EditProfileImage)
+		authGroup.GET("/logout", internal.Logout)
+	}
 
 	router.Run(":8080")
 }

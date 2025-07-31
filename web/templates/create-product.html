@@ -2,27 +2,309 @@
 <html>
     <head>
         <title>Product | Creation</title>
+        <style>
+            * {
+                box-sizing: border-box;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+            
+            body {
+                background-color: #f5f7fa;
+                margin: 0;
+                padding: 20px;
+                color: #333;
+            }
+            
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .description-container {
+            position: relative;
+                margin-bottom: 20px;
+            }
+            
+            textarea#description {
+                width: 100%;
+                height: 150px; /* Фиксированная высота */
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 16px;
+                transition: border-color 0.3s;
+                resize: none; /* Запрещаем изменение размера */
+                overflow-y: auto; /* Добавляем прокрутку при необходимости */
+            }
+            
+            h1 {
+                text-align: center;
+                color: #2c3e50;
+                margin-bottom: 30px;
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #2c3e50;
+            }
+            
+            input[type="text"],
+            input[type="number"],
+            textarea,
+            select {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 16px;
+                transition: border-color 0.3s;
+            }
+            
+            input[type="text"]:focus,
+            input[type="number"]:focus,
+            textarea:focus,
+            select:focus {
+                border-color: #3498db;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            }
+            
+            textarea {
+                min-height: 100px;
+                resize: vertical;
+            }
+            
+            .select-group {
+                display: flex;
+                gap: 20px;
+            }
+            
+            .select-group > div {
+                flex: 1;
+            }
+            
+            .file-upload {
+                border: 2px dashed #ddd;
+                padding: 20px;
+                text-align: center;
+                border-radius: 6px;
+                margin-bottom: 20px;
+                transition: all 0.3s;
+            }
+            
+            .file-upload:hover {
+                border-color: #3498db;
+                background-color: #f8fafc;
+            }
+            
+            input[type="file"] {
+                display: none;
+            }
+            
+            .file-label {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #3498db;
+                color: white;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            
+            .file-label:hover {
+                background-color: #2980b9;
+            }
+            
+            .submit-btn {
+                display: block;
+                width: 100%;
+                padding: 15px;
+                background-color: #2ecc71;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            
+            .submit-btn:hover {
+                background-color: #27ae60;
+            }
+            
+            .preview-images {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 15px;
+            }
+            
+            .preview-img {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+            }
+            
+            @media (max-width: 600px) {
+                .select-group {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                
+                .container {
+                    padding: 20px;
+                }
+            }
+        </style>
     </head>
     <body>
-        <form action="http://localhost:8080/creation" enctype="multipart/form-data" method="post">
-            <p>Введите название товара</p>
-            <input name="name" required>
-            <br>
-            <p>Ведите краткое описание товара</p>
-            <input name="description" type="text" required>
-            <br>
-            <p>Введите категорию товара</p>
-            <input name="category" required>
-            <br>
-            <p>Введите стоимость товара</p>
-            <input name="price" required>
-            <br>
-            <p>Загрузите изображение</p>
-            <br>
-            <input type="file" name="foto" multiple accept="image/jpeg, image/png,">
-            <br>
-            <input type="submit">
-        </form>
+        <div class="container">
+            <h1>Добавление нового товара</h1>
+            
+            <form action="http://localhost:8080/creation" enctype="multipart/form-data" method="post">
+                <div class="form-group">
+                    <label for="name">Название товара</label>
+                    <input type="text" id="name" name="name" placeholder="Введите название" required>
+                </div>
+                
+                <div class="form-group description-container">
+                    <label for="description">Описание товара</label>
+                    <textarea id="description" name="description" required ></textarea>
+                </div>
+                
+                <div class="select-group">
+                    <div class="form-group">
+                        <label for="category">Категория</label>
+                        <select id="category" name="category" required onchange="updateSubcategories()">
+                            <option value="">-- Выберите категорию --</option>
+                            <option value="Продукты питания">Продукты питания</option>
+                            <option value="Бытовая химия">Бытовая химия</option>
+                            <option value="Одежда и обувь">Одежда и обувь</option>
+                            <option value="Электроника">Электроника</option>
+                            <option value="Товары для дома">Товары для дома</option>
+                            <option value="Канцелярские товары">Канцелярские товары</option>
+                            <option value="Косметика и парфюмерия">Косметика и парфюмерия</option>
+                            <option value="Детские товары">Детские товары</option>
+                            <option value="Книги и журналы">Книги и журналы</option>
+                            <option value="Спорт и отдых">Спорт и отдых</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subcategory">Подкатегория</label>
+                        <select id="subcategory" name="subcategory" required>
+                            <option value="">-- Сначала выберите категорию --</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="price">Цена (руб.)</label>
+                    <input type="number" id="price" name="price" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Изображения товара</label>
+                    <div class="file-upload">
+                        <label for="foto" class="file-label">Выберите файлы</label>
+                        <input type="file" id="foto" name="foto" multiple accept="image/jpeg, image/png" onchange="previewFiles(this)">
+                        <p>Перетащите файлы сюда или нажмите для выбора</p>
+                        <div class="preview-images" id="preview"></div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">Добавить товар</button>
+            </form>
+        </div>
+    
+        <script>
+            // Объект с подкатегориями для каждой категории
+            const subcategories = {
+                "Продукты питания": ["Молочные продукты", "Мясо", "Рыба", "Фрукты", "Овощи", "Бакалея", "Кондитерские изделия", "Напитки"],
+                "Бытовая химия": ["Моющие средства", "Средства для уборки", "Средства личной гигиены"],
+                "Одежда и обувь": ["Мужская одежда", "Женская одежда", "Детская одежда", "Обувь", "Аксессуары"],
+                "Электроника": ["Телефоны", "Компьютеры", "Телевизоры", "Бытовая техника"],
+                "Товары для дома": ["Мебель", "Посуда", "Текстиль", "Декор"],
+                "Канцелярские товары": ["Ручки", "Карандаши", "Бумага", "Блокноты"],
+                "Косметика и парфюмерия": ["Декоративная косметика", "Уходовая косметика", "Парфюмерия"],
+                "Детские товары": ["Одежда", "Игрушки", "Питание", "Подгузники"],
+                "Книги и журналы": ["Художественная литература", "Научная литература", "Журналы"],
+                "Спорт и отдых": ["Спортивный инвентарь", "Товары для туризма", "Товары для активного отдыха"]
+            };
+    
+            // Функция для обновления подкатегорий
+            function updateSubcategories() {
+                const categorySelect = document.getElementById('category');
+                const subcategorySelect = document.getElementById('subcategory');
+                const selectedCategory = categorySelect.value;
+                
+                subcategorySelect.innerHTML = '<option value="">-- Выберите подкатегорию --</option>';
+                
+                if (selectedCategory && subcategories[selectedCategory]) {
+                    subcategories[selectedCategory].forEach(subcat => {
+                        const option = document.createElement('option');
+                        option.value = subcat;
+                        option.textContent = subcat;
+                        subcategorySelect.appendChild(option);
+                    });
+                }
+            }
+    
+            // Функция для предпросмотра изображений
+            function previewFiles(input) {
+                const preview = document.getElementById('preview');
+                preview.innerHTML = '';
+                
+                if (input.files) {
+                    Array.from(input.files).forEach(file => {
+                        if (!file.type.match('image.*')) return;
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.classList.add('preview-img');
+                            preview.appendChild(img);
+                        }
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }
+    
+            // Обработка drag and drop
+            const fileUpload = document.querySelector('.file-upload');
+            fileUpload.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUpload.style.borderColor = '#3498db';
+                fileUpload.style.backgroundColor = '#f0f7fd';
+            });
+            
+            fileUpload.addEventListener('dragleave', () => {
+                fileUpload.style.borderColor = '#ddd';
+                fileUpload.style.backgroundColor = '';
+            });
+            
+            fileUpload.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUpload.style.borderColor = '#ddd';
+                fileUpload.style.backgroundColor = '';
+                document.getElementById('foto').files = e.dataTransfer.files;
+                previewFiles(document.getElementById('foto'));
+            });
+        </script>
     </body>
 </html>
 {{end}}

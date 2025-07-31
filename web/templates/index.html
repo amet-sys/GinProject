@@ -98,6 +98,37 @@
             font-weight: bold;
             color: #27ae60;
         }
+
+         /* Стили для кнопки "Наверх" */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-size: 24px;
+            text-decoration: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+        
+        .back-to-top:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
         
         /* Адаптивность */
         @media (max-width: 768px) {
@@ -122,30 +153,44 @@
     {{ template "header" . }}
     
     <main class="container">
-        <div class="search">
-            <form action="/search" method="GET">
-                <input type="text" name="query" placeholder="Поиск товаров...">
-                <button type="submit">Найти</button>
-            </form>
-        </div>
+        {{ template "search" . }}
         <h1>Товары</h1>
         
         <div class="products-grid">
-            {{range .Products}}
-                <p>{{.Id}}</p>
-                <p>{{.Name}}</p>
-                <p>{{.Description}}</p>
-                <p>{{.Category}}</p>
-                <p>{{.Price}}</p>
-                {{range .Images}}
-                    <img src="{{.}}">
-                {{end}}
-                <p>{{.Creator}}</p>
-            {{end}}
+            {{ template "product" . }}
         </div>
+        
+        <!-- Кнопка "Наверх" -->
+        <a href="#top" class="back-to-top" title="Вернуться наверх">↑</a>
     </main>
     
     {{ template "footer" . }}
+    <script>
+        //Очищаем #top из URL 
+        const backToTop = document.querySelector('.back-to-top');
+
+        backToTop.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            
+            // Убираем хэш через 500ms после начала прокрутки
+            setTimeout(() => {
+                history.replaceState(null, null, ' ');
+            }, 500);
+        });
+
+        // Обработчик для URL с хэшем
+        window.addEventListener('load', () => {
+            if (window.location.hash === '#top') {
+                window.scrollTo({ top: 0 });
+                history.replaceState(null, null, ' ');
+            }
+        });
+    </script>
 </body>
 </html>
 {{end}}

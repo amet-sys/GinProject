@@ -1,0 +1,222 @@
+{{define "search"}}
+<div class="search-container" id="top">
+    <input type="text" id="search-input" placeholder="Поиск товаров..." class="search-input">
+    <button id="search-button" class="search-button">Найти</button>
+</div>
+
+<div id="search-results" class="products-grid">
+    <!-- Результаты поиска будут здесь -->
+</div>
+
+<script>
+    document.getElementById('search-button').addEventListener('click', searchProducts);
+    document.getElementById('search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') searchProducts();
+    });
+
+    function searchProducts() {
+        const query = document.getElementById('search-input').value;
+        if (!query.trim()) return;
+
+        fetch(`/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                displayResults(data.results);
+            })
+            .catch(error => {
+                console.error('Ошибка поиска:', error);
+                document.getElementById('search-results').innerHTML = 
+                    '<p class="error-message">Произошла ошибка при поиске</p>';
+            });
+    }
+
+    function displayResults(products) {
+        const container = document.getElementById('search-results');
+        container.innerHTML = '';
+
+        if (products.length === 0) {
+            container.innerHTML = '<p class="no-results">Товары не найдены</p>';
+            return;
+        }
+
+        products.forEach(product => {
+            const productCard = `
+                <div class="product-card">
+                    <div class="image-container">
+                        <img src="${product.images[0]}" alt="${product.name}" class="product-image">
+                    </div>
+                    <div class="product-details">
+                        <h3 class="product-title">${product.name}</h3>
+                        <p class="product-price">${product.price.toLocaleString()} ₽</p>
+                        <a href="/product/${product.id}" class="view-button">Подробнее</a>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += productCard;
+        });
+    }
+
+     // Показываем кнопку при прокрутке
+     window.addEventListener('scroll', function() {
+            const backToTopButton = document.querySelector('.back-to-top');
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+        
+        
+</script>
+
+<style>
+    /* Стили для поисковой строки */
+    .search-container {
+        margin: 20px auto;
+        max-width: 800px;
+        display: flex;
+        gap: 10px;
+        padding: 0 15px;
+    }
+
+    .search-input {
+        padding: 12px 15px;
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .search-input:focus {
+        border-color: #3498db;
+    }
+
+    .search-button {
+        padding: 12px 25px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s;
+    }
+
+    .search-button:hover {
+        background-color: #2980b9;
+    }
+
+    /* Стили для результатов поиска */
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 25px;
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+
+    .image-container {
+        height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        background: #f9f9f9;
+    }
+
+    .product-image {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+        border-radius: 5px;
+    }
+
+    .product-details {
+        padding: 15px;
+    }
+
+    .product-title {
+        font-size: 16px;
+        margin: 0 0 8px 0;
+        color: #333;
+        font-weight: 500;
+        line-height: 1.3;
+    }
+
+    .product-price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #e53935;
+        margin: 0 0 15px 0;
+    }
+
+    .view-button {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #f5f5f5;
+        color: #333;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+
+    .view-button:hover {
+        background-color: #e0e0e0;
+    }
+
+    .no-results {
+        text-align: center;
+        color: #666;
+        font-size: 18px;
+        margin: 40px 0;
+        grid-column: 1 / -1;
+    }
+
+    .error-message {
+        text-align: center;
+        color: #e53935;
+        font-size: 18px;
+        margin: 40px 0;
+        grid-column: 1 / -1;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+        
+        .image-container {
+            height: 120px;
+            padding: 10px;
+        }
+        
+        .product-title {
+            font-size: 14px;
+        }
+        
+        .product-price {
+            font-size: 16px;
+        }
+    }
+</style>
+{{end}}
