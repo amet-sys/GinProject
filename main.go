@@ -76,6 +76,10 @@ func main() {
 		authGroup.PATCH("/cart/increase", internal.IncreaseProduct)
 		authGroup.PATCH("/cart/decrease", internal.DecreaseProduct)
 		authGroup.PATCH("/cart/remove", internal.RemoveProduct)
+		authGroup.GET("/profile", internal.Profile)
+		authGroup.PATCH("/profile/edit-image", internal.EditProfileImage)
+		authGroup.GET("/logout", internal.Logout)
+		authGroup.POST("/add-comment", internal.AddComment)
 		// Защищённые маршруты (требуется роль продавца)
 		salersGroup := authGroup.Group("/")        // Используем authGroup как родительскую
 		salersGroup.Use(internal.RoleMiddleware()) // Добавляем middleware проверки роли
@@ -86,9 +90,6 @@ func main() {
 			salersGroup.DELETE("/delete-product/:id", internal.DeleteProduct)
 		}
 
-		authGroup.GET("/profile", internal.Profile)
-		authGroup.PATCH("/profile/edit-image", internal.EditProfileImage)
-		authGroup.GET("/logout", internal.Logout)
 	}
 
 	router.Run(":8080")

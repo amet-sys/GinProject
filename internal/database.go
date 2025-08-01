@@ -60,6 +60,22 @@ func ConnectToDB() (*sql.DB, error) {
 		db.Close()
 		return nil, err
 	}
+
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS Comments (
+		id INT AUTO_INCREMENT PRIMARY KEY,
+		time DATETIME NOT NULL,
+		text VARCHAR(1000) NOT NULL,
+		product_id CHAR(36) NOT NULL,
+		creator VARCHAR(75) NOT NULL
+	)`)
+	//Если нужно вручную создать БД для Comments
+	//CREATE TABLE Comments (id INT AUTO_INCREMENT PRIMARY KEY, time DATETIME NOT NULL, text VARCHAR(1000) NOT NULL, product_id CHAR(36) NOT NULL, creator VARCHAR(75) NOT NULL);
+	if err != nil {
+		log.Printf("Failed to create Users table: %v", err)
+		db.Close()
+		return nil, err
+	}
+
 	log.Print("Successfully connected to MySQL!")
 	return db, nil
 }

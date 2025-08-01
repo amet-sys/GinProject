@@ -384,12 +384,8 @@
             document.getElementById('editForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                // Здесь можно добавить AJAX-запрос для сохранения изменений
                 fetch(this.action, {
                     method: 'PUT',
-                    headers: {
-                            'Content-Type': 'application/json',
-                        },
                     body: new FormData(this)
                 })
                 .then(response => {
@@ -401,6 +397,8 @@
                 .catch(error => console.error('Error:', error));
             });
 
+
+        //Меняем аватарку пользователя    
         // Открытие модального окна
         function openModal() {
             document.getElementById('avatarModal').style.display = 'block';

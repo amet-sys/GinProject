@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -41,7 +40,7 @@ func init() {
 	}
 }
 
-var jwtSecret = []byte("")
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 func Main(c *gin.Context) {
 	Products := GetAllProducts()
@@ -682,11 +681,29 @@ func ShowProduct(c *gin.Context) {
 
 	_ = json.Unmarshal([]byte(paths), &product.Images)
 
+	var comments []Comment
+	rows, err := db.Query(`SELECT id, time, text, product_id, creator FROM Comments WHERE product_id =?`, product.Id)
+	if err != nil {
+		log.Print("Не удалось выполнить запрос: ", err)
+	}
+
+	for rows.Next() {
+		var comment Comment
+		var Time []uint8
+		err := rows.Scan(&comment.Id, &Time, &comment.Text, &comment.ProductId, &comment.Creator)
+		if err != nil {
+			log.Print("Не удалось получить данные после запроса: ", err)
+		}
+		comment.TimeForUser = string(Time)
+		comments = append(comments, comment)
+	}
+
 	token, err := c.Cookie("jwt-token")
 	if err != nil || token == "" {
 		c.HTML(http.StatusOK, "productPage", gin.H{
-			"user":    nil,
-			"Product": product,
+			"user":     nil,
+			"Product":  product,
+			"comments": comments,
 		})
 		return
 	}
@@ -694,8 +711,9 @@ func ShowProduct(c *gin.Context) {
 	email, err := GetEmailFromToken(token)
 	if err != nil || email == "" {
 		c.HTML(http.StatusOK, "productPage", gin.H{
-			"user":    nil,
-			"Product": product,
+			"user":     nil,
+			"Product":  product,
+			"comments": comments,
 		})
 		return
 	}
@@ -706,8 +724,9 @@ func ShowProduct(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "productPage", gin.H{
-		"user":    User,
-		"Product": product,
+		"user":     User,
+		"Product":  product,
+		"comments": comments,
 	})
 
 }
@@ -774,13 +793,62 @@ func DeleteProduct(c *gin.Context) {
 }
 
 func UpdateProduct(c *gin.Context) {
-	var Product Product
-	body, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Print("Ошибка извлечения тела запроса:  ", err)
+	var product Product
+	if err := c.ShouldBind(&product); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid form data",
+			"details": err.Error(),
+		})
 		return
 	}
-	defer c.Request.Body.Close()
-	_ = json.Unmarshal(body, &Product)
-	log.Print(Product)
+
+	_, err := db.Exec(
+		"UPDATE Products SET name = ?, description = ?, category = ?, subcategory = ?, price = ? WHERE id = ?",
+		product.Name,
+		product.Description,
+		product.Category,
+		product.Subcategory,
+		product.Price,
+		product.Id,
+	)
+	if err != nil {
+		log.Fatal("Ошибка обновления данных о товаре: ", err)
+	}
+	c.JSON(http.StatusOK, "")
+}
+
+func AddComment(c *gin.Context) {
+	var comment Comment
+	err := c.Bind(&comment)
+	if err != nil {
+		log.Print("Ошибка в получении данных комментария: ", err)
+		return
+	}
+	comment.TimeForDB = time.Now()
+
+	token, err := c.Cookie("jwt-token")
+	if err != nil || token == "" {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	email, err := GetEmailFromToken(token)
+	if err != nil {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+	comment.Creator = email
+
+	_, err = db.Exec("INSERT INTO Comments (time, text, product_id, creator) VALUES (?, ?, ?, ?)",
+		comment.TimeForDB,
+		comment.Text,
+		comment.ProductId,
+		comment.Creator,
+	)
+	if err != nil {
+		log.Print("Не удалось добавить комментарий в базу данных: ", err)
+		return
+	}
+	path := "/product/" + comment.ProductId
+	c.Redirect(http.StatusFound, path)
 }

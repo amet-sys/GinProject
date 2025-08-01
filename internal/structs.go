@@ -1,11 +1,13 @@
 package internal
 
 import (
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type Product struct {
-	Id          string   `json:"id"`
+	Id          string   `form:"id" json:"id"`
 	Name        string   `form:"name" json:"name"`
 	Description string   `form:"description" json:"description"`
 	Category    string   `form:"category" json:"category"`
@@ -14,6 +16,15 @@ type Product struct {
 	Images      []string `json:"images"`
 	Creator     string   `json:"creator"`
 	Counts      int
+}
+
+type Comment struct {
+	Id          string
+	TimeForUser string
+	TimeForDB   time.Time
+	Text        string `form:"text" json:"text"`
+	ProductId   string `form:"product_id" json:"product_id"`
+	Creator     string
 }
 
 type User struct {
